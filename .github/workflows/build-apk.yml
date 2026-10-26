@@ -18,13 +18,13 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.22.3"
+          flutter-version: "3.44.9"
           channel: stable
           cache: true
 
       - name: Extract project zip
         run: |
-          ZIP=$(ls *.zip | head -n 1)
+          ZIP=$(printf '%s\n' *.zip | LC_ALL=C sort | tail -n 1)
           echo "Using $ZIP"
           mkdir -p /tmp/src
           unzip -q "$ZIP" -d /tmp/src
@@ -38,8 +38,7 @@ jobs:
           cp -r android/. /tmp/android_backup/
           flutter create . --platforms android --project-name happ_clone --org com.example
           cp -r /tmp/android_backup/. android/
-          sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-all.zip#' android/gradle/wrapper/gradle-wrapper.properties
-          sed -i 's/versionCode flutter.versionCode/versionCode 1/; s/versionName flutter.versionName/versionName "1.0.0"/' android/app/build.gradle
+          rm -f android/build.gradle.kts android/settings.gradle.kts android/app/build.gradle.kts
 
       - name: Get dependencies
         working-directory: ${{ env.PROJECT_DIR }}
