@@ -5,6 +5,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -48,7 +51,22 @@ jobs:
         working-directory: ${{ env.PROJECT_DIR }}
         run: flutter build apk --release
 
+      - name: Check APK
+        run: |
+          APK="${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk"
+          ls -la "$APK"
+          unzip -tq "$APK"
+          cp "$APK" /tmp/Irisv2ray.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Irisv2ray build ${{ github.run_number }}
+          files: /tmp/Irisv2ray.apk
+
       - uses: actions/upload-artifact@v4
         with:
           name: happ-clone-apk
-          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk
+          path: /tmp/Irisv2ray.apk
+          compression-level: 0
